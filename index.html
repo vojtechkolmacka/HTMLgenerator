@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Koloběžníkův Web Generator</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f8fafc;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+        }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: var(--card-bg);
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+        h1 { margin-top: 0; font-size: 1.5rem; color: #60a5fa; }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #475569;
+            background: #0f172a;
+            color: #fff;
+            box-sizing: border-box;
+        }
+        textarea { resize: vertical; height: 120px; }
+        button {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.2s;
+        }
+        button:hover { background: var(--accent-hover); }
+        .preview-box {
+            margin-top: 24px;
+            padding: 16px;
+            background: #0f172a;
+            border-radius: 8px;
+            border: 1px dashed #475569;
+        }
+        pre { white-space: pre-wrap; word-break: break-all; color: #cbd5e1; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>🚀 PWA Web Generator</h1>
+        <p>Zadej parametry stránky a vygeneruj si hotový HTML kód.</p>
+        
+        <div class="form-group">
+            <label for="pageTitle">Název stránky (Title):</label>
+            <input type="text" id="pageTitle" placeholder="Např. Moje nová jízda">
+        </div>
+
+        <div class="form-group">
+            <label for="pageHeading">Hlavní nadpis (H1):</label>
+            <input type="text" id="pageHeading" placeholder="Např. Vítejte na mém webu">
+        </div>
+
+        <div class="form-group">
+            <label for="pageContent">Obsah článku / text:</label>
+            <textarea id="pageContent" placeholder="Sem napiš text, který se má vygenerovat..."></textarea>
+        </div>
+
+        <button onclick="generateWeb()">Generovat kód stránky</button>
+
+        <div class="preview-box">
+            <h3>Vygenerovaný HTML kód:</h3>
+            <pre id="outputCode">Zatím nic není vygenerováno...</pre>
+            <button id="downloadBtn" style="display:none; margin-top: 12px; background: #10b981;" onclick="downloadFile()">Stáhnout jako index.html</button>
+        </div>
+    </div>
+
+    <script>
+        let generatedHtmlContent = "";
+
+        function generateWeb() {
+            const title = document.getElementById('pageTitle').value || "Bez názvu";
+            const heading = document.getElementById('pageHeading').value || "Vítejte";
+            const content = document.getElementById('pageContent').value || "";
+
+            generatedHtmlContent = `<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${title}</title>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 40px auto; padding: 0 20px; line-height: 1.6; color: #333; }
+        h1 { color: #2563eb; }
+    </style>
+</head>
+<body>
+    <h1>${heading}</h1>
+    <p>${content.replace(/\n/g, '<br>')}</p>
+</body>
+</html>`;
+
+            document.getElementById('outputCode').textContent = generatedHtmlContent;
+            document.getElementById('downloadBtn').style.display = "block";
+        }
+
+        function downloadFile() {
+            const blob = new Blob([generatedHtmlContent], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'index.html';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Registrace Service Workeru pro PWA
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(() => console.log('Service Worker registrován.'))
+                .catch(err => console.log('Chyba SW:', err));
+        }
+    </script>
+</body>
+</html>
